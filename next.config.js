@@ -2,9 +2,6 @@
 const nextConfig = {
   // We don't need to specify NEXT_PUBLIC_ variables in env as they are automatically
   // available to the browser. Only add non-NEXT_PUBLIC_ variables here if needed.
-  env: {
-    GITHUB_OAUTH_CLIENT_SECRET: process.env.GITHUB_OAUTH_CLIENT_SECRET,
-  },
   images: {
     domains: ['fdgwgahxwobvovkebcew.supabase.co', 'avatars.githubusercontent.com'],
   },
