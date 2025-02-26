@@ -3,27 +3,47 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
+  console.log('Middleware triggered for path:', req.nextUrl.pathname);
+  
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
 
-  // Refresh session if expired - required for Server Components
-  await supabase.auth.getSession();
+  try {
+    // Refresh session if expired
+    const { data: { session: initialSession } } = await supabase.auth.getSession();
+    console.log('Initial session check:', { hasSession: !!initialSession });
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    // Check if the route requires authentication
+    const requiresAuth = !req.nextUrl.pathname.startsWith('/auth') &&
+      !req.nextUrl.pathname.startsWith('/_next') &&
+      !req.nextUrl.pathname.startsWith('/favicon.ico') &&
+      !req.nextUrl.pathname.startsWith('/public') &&
+      req.nextUrl.pathname !== '/' &&
+      req.nextUrl.pathname !== '/events';
 
-  // If user is not signed in and the current path is not /auth/signin,
-  // redirect the user to /auth/signin
-  if (!session && !req.nextUrl.pathname.startsWith('/auth')) {
-    const redirectUrl = req.nextUrl.clone();
-    const signinUrl = new URL('/auth/signin', req.url);
-    // Add the original URL as a "next" parameter
-    signinUrl.searchParams.set('next', redirectUrl.pathname);
-    return NextResponse.redirect(signinUrl);
+    console.log('Route authentication check:', { 
+      path: req.nextUrl.pathname,
+      requiresAuth 
+    });
+
+    if (requiresAuth) {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Protected route session check:', { hasSession: !!session });
+      
+      if (!session) {
+        const redirectUrl = req.nextUrl.clone();
+        const signinUrl = new URL('/auth/signin', req.url);
+        signinUrl.searchParams.set('next', redirectUrl.pathname);
+        console.log('Redirecting to signin:', signinUrl.toString());
+        return NextResponse.redirect(signinUrl);
+      }
+    }
+
+    return res;
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return res;
   }
-
-  return res;
 }
 
 export const config = {
@@ -36,7 +56,8 @@ export const config = {
      * - public folder
      * - auth related paths (we don't want to redirect these)
      * - root homepage (/)
+     * - events page (/events)
      */
-    '/((?!_next/static|_next/image|favicon.ico|public|auth|$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public|auth|events|$).*)',
   ],
 }; 

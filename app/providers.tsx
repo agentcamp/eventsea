@@ -24,14 +24,31 @@ export function AuthProvider({
   const supabase = createClientComponentClient();
 
   useEffect(() => {
+    // Check for initial session
+    const initSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setUser(session.user);
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initSession();
+
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, !!session);
         if (session) {
           setUser(session.user);
         } else {
           setUser(null);
         }
-        setLoading(false);
         router.refresh();
       }
     );

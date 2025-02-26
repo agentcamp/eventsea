@@ -5,44 +5,48 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+  console.log('Auth callback triggered');
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const next = requestUrl.searchParams.get('next') || '/create-event';
+  
+  console.log('Auth callback params:', { code: !!code, next });
 
   if (code) {
     const cookieStore = cookies();
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     
     try {
-      await supabase.auth.exchangeCodeForSession(code);
+      console.log('Exchanging code for session...');
+      const { data: { session }, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
       
-      // Get the session to confirm it worked
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
+      if (sessionError || !session) {
+        console.error('Session error:', sessionError);
         throw new Error('Failed to get session after code exchange');
       }
 
-      // Successful authentication, redirect to the requested page
-      const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}${next}`);
-
-      // Set cookie with session info
-      response.cookies.set('supabase-auth-token', session.access_token, {
-        path: '/',
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 1 week
+      console.log('Session obtained successfully:', { 
+        userId: session.user.id,
+        expiresAt: session.expires_at
       });
 
-      return response;
+      // Double check the session is stored
+      const { data: { session: checkSession } } = await supabase.auth.getSession();
+      console.log('Session check:', { hasSession: !!checkSession });
+
+      // Successful authentication, redirect to the requested page
+      const redirectUrl = new URL(next, requestUrl.origin);
+      console.log('Redirecting to:', redirectUrl.toString());
+      
+      return NextResponse.redirect(redirectUrl);
+
     } catch (error) {
       console.error('Auth error:', error);
       // Redirect to sign in page on error
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}/auth/signin?error=Authentication failed`);
+      return NextResponse.redirect(new URL('/auth/signin?error=Authentication failed', requestUrl.origin));
     }
   }
 
-  // No code present, redirect to sign in
-  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}/auth/signin`);
+  console.log('No auth code present, redirecting to signin');
+  return NextResponse.redirect(new URL('/auth/signin', requestUrl.origin));
 } 

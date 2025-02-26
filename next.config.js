@@ -8,16 +8,7 @@ const nextConfig = {
   // Enable experimental features if needed
   experimental: {
     serverActions: true,
-  },
-  // Add rewrites for Supabase Auth
-  async rewrites() {
-    return [
-      {
-        source: '/auth/callback',
-        destination: '/api/auth/callback',
-      },
-    ]
-  },
+  }
 }
 
 module.exports = nextConfig 

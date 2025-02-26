@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSession } from '@/lib/auth';
+import { useAuth } from '../providers';
 
 export default function CreateEvent() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -15,22 +15,10 @@ export default function CreateEvent() {
   });
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const session = await getSession();
-        if (!session) {
-          router.push('/auth/signin');
-        } else {
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Error checking auth:', error);
-        router.push('/auth/signin');
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    if (!loading && !user) {
+      router.push('/auth/signin?next=/create-event');
+    }
+  }, [loading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +31,7 @@ export default function CreateEvent() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  if (isLoading) {
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Loading...</div>

@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
   throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
@@ -11,13 +11,13 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClientComponentClient();
 
 export const signInWithGitHub = async (redirectTo?: string) => {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'github',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_ORIGIN}/auth/callback${redirectTo ? `?next=${redirectTo}` : ''}`
+      redirectTo: `/auth/callback${redirectTo ? `?next=${redirectTo}` : ''}`
     }
   });
 

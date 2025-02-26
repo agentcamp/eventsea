@@ -1,7 +1,12 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "./providers";
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-primary">
       {/* Hero Section */}
@@ -15,7 +20,10 @@ export default function Home() {
               Create, discover, and attend next-generation events powered by Web3 technology. Join over 10,000+ event organizers revolutionizing the event industry.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/create-event" className="px-8 py-4 bg-white text-primary rounded-lg hover:bg-secondary transition-colors font-semibold text-center">
+              <Link 
+                href={user ? "/create-event" : "/auth/signin?next=/create-event"} 
+                className="px-8 py-4 bg-white text-primary rounded-lg hover:bg-secondary transition-colors font-semibold text-center"
+              >
                 Create Event
               </Link>
               <Link href="/events" className="px-8 py-4 border-2 border-white text-white rounded-lg hover:bg-white hover:text-primary transition-colors font-semibold text-center">
