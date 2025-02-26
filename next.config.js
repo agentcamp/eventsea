@@ -1,13 +1,25 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // We don't need to specify NEXT_PUBLIC_ variables in env as they are automatically
+  // available to the browser. Only add non-NEXT_PUBLIC_ variables here if needed.
   env: {
-    SUPABASE_URL: process.env.SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_SECRET: process.env.SUPABASE_SERVICE_ROLE_SECRET,
-    NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID: process.env.NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID,
-    NEXT_PUBLIC_SITE_ORIGIN: process.env.NEXT_PUBLIC_SITE_ORIGIN,
+    GITHUB_OAUTH_CLIENT_SECRET: process.env.GITHUB_OAUTH_CLIENT_SECRET,
   },
   images: {
-    domains: ['styjswjyforpnjhgqdse.supabase.co'], // Add your Supabase domain for image hosting
+    domains: ['fdgwgahxwobvovkebcew.supabase.co', 'avatars.githubusercontent.com'],
+  },
+  // Enable experimental features if needed
+  experimental: {
+    serverActions: true,
+  },
+  // Add rewrites for Supabase Auth
+  async rewrites() {
+    return [
+      {
+        source: '/auth/callback',
+        destination: '/api/auth/callback',
+      },
+    ]
   },
 }
 

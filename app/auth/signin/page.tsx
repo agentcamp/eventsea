@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { signInWithGitHub } from '@/lib/auth';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get('next') || '/create-event';
 

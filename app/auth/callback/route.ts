@@ -2,13 +2,16 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const next = requestUrl.searchParams.get('next') || '/create-event';
 
   if (code) {
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
     
     try {
       await supabase.auth.exchangeCodeForSession(code);
@@ -19,9 +22,20 @@ export async function GET(request: Request) {
       if (!session) {
         throw new Error('Failed to get session after code exchange');
       }
-      
+
       // Successful authentication, redirect to the requested page
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}${next}`);
+      const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}${next}`);
+
+      // Set cookie with session info
+      response.cookies.set('supabase-auth-token', session.access_token, {
+        path: '/',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 1 week
+      });
+
+      return response;
     } catch (error) {
       console.error('Auth error:', error);
       // Redirect to sign in page on error
