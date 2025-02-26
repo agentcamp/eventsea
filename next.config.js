@@ -1,29 +1,14 @@
-/**
- * Copyright 2020 Vercel Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  env: {
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_SECRET: process.env.SUPABASE_SERVICE_ROLE_SECRET,
+    NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID: process.env.NEXT_PUBLIC_GITHUB_OAUTH_CLIENT_ID,
+    NEXT_PUBLIC_SITE_ORIGIN: process.env.NEXT_PUBLIC_SITE_ORIGIN,
+  },
   images: {
-    domains: [
-      'www.datocms-assets.com',
-      'a.storyblok.com',
-      'images.ctfassets.net',
-      'images.prismic.io',
-      'cdn.aglty.io',
-      'localhost' // For Strapi
-    ],
-    imageSizes: [24, 64, 300]
-  }
-};
+    domains: ['styjswjyforpnjhgqdse.supabase.co'], // Add your Supabase domain for image hosting
+  },
+}
+
+module.exports = nextConfig 
