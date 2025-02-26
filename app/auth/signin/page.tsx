@@ -1,14 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { signInWithGitHub } from '@/lib/auth';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const next = searchParams.get('next') || '/create-event';
 
   const handleGitHubSignIn = async () => {
     try {
