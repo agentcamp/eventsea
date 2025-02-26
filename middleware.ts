@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  console.log('Middleware triggered for path:', req.nextUrl.pathname);
   
   const res = NextResponse.next();
   const supabase = createMiddlewareClient({ req, res });
@@ -11,7 +10,6 @@ export async function middleware(req: NextRequest) {
   try {
     // Refresh session if expired
     const { data: { session: initialSession } } = await supabase.auth.getSession();
-    console.log('Initial session check:', { hasSession: !!initialSession });
 
     // Check if the route requires authentication
     const requiresAuth = !req.nextUrl.pathname.startsWith('/auth') &&
@@ -21,20 +19,14 @@ export async function middleware(req: NextRequest) {
       req.nextUrl.pathname !== '/' &&
       req.nextUrl.pathname !== '/events';
 
-    console.log('Route authentication check:', { 
-      path: req.nextUrl.pathname,
-      requiresAuth 
-    });
 
     if (requiresAuth) {
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('Protected route session check:', { hasSession: !!session });
       
       if (!session) {
         const redirectUrl = req.nextUrl.clone();
         const signinUrl = new URL('/auth/signin', req.url);
         signinUrl.searchParams.set('next', redirectUrl.pathname);
-        console.log('Redirecting to signin:', signinUrl.toString());
         return NextResponse.redirect(signinUrl);
       }
     }

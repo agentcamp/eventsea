@@ -1,18 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { User } from '@supabase/supabase-js';
+import type { Event } from '@/lib/database';
 
 interface EventCardProps {
-  event: {
-    id: number;
-    title: string;
-    description: string;
-    date: string;
-    location: string;
-    image: string;
-    price: string;
-    category: string;
-  };
+  event: Event;
   user: User | null;
 }
 
@@ -21,7 +13,7 @@ export default function EventCard({ event, user }: EventCardProps) {
     <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
       <div className="relative h-48">
         <Image
-          src={event.image}
+          src={event.image || '/event-1.jpg'}
           alt={event.title}
           fill
           className="object-cover"

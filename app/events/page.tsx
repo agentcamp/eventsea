@@ -1,52 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../providers';
 import EventCard from '../components/EventCard';
+import { getEvents, type Event } from '@/lib/database';
 
-// Mock data for initial development
-const MOCK_EVENTS = [
-  {
-    id: 1,
-    title: 'Web3 Developer Summit',
-    description: 'Join the biggest Web3 developer conference of the year',
-    date: '2024-06-15T09:00:00',
-    location: 'Virtual',
-    image: '/event-1.jpg',
-    price: 'Free',
-    category: 'Technology'
-  },
-  {
-    id: 2,
-    title: 'NFT Art Exhibition',
-    description: 'Discover the future of digital art in this exclusive exhibition',
-    date: '2024-06-20T18:00:00',
-    location: 'New York, NY',
-    image: '/event-2.jpg',
-    price: '0.1 ETH',
-    category: 'Art'
-  },
-  {
-    id: 3,
-    title: 'DeFi Workshop',
-    description: 'Learn about decentralized finance from industry experts',
-    date: '2024-06-25T14:00:00',
-    location: 'London, UK',
-    image: '/event-3.jpg',
-    price: '50 USDC',
-    category: 'Finance'
-  },
-  // Add more mock events as needed
-];
-
-const CATEGORIES = ['All', 'Technology', 'Art', 'Finance', 'Music', 'Sports'];
+const CATEGORIES = ['All', 'Technology', 'Art', 'Finance', 'Music', 'Sports', 'Other'];
 
 export default function Events() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const filteredEvents = MOCK_EVENTS.filter(event => {
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await getEvents();
+        setEvents(data);
+      } catch (err) {
+        setError('Failed to load events');
+        console.error('Error loading events:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const filteredEvents = events.filter(event => {
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
@@ -96,17 +81,29 @@ export default function Events() {
 
       {/* Events Grid */}
       <main className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredEvents.map((event) => (
-            <EventCard key={event.id} event={event} user={user} />
-          ))}
-        </div>
-
-        {filteredEvents.length === 0 && (
+        {loading ? (
           <div className="text-center py-12">
-            <h3 className="text-2xl font-semibold text-gray-600">No events found</h3>
-            <p className="text-gray-500 mt-2">Try adjusting your search or filters</p>
+            <div className="text-2xl font-semibold text-gray-600">Loading events...</div>
           </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <div className="text-2xl font-semibold text-red-600">{error}</div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredEvents.map((event) => (
+                <EventCard key={event.id} event={event} user={user} />
+              ))}
+            </div>
+
+            {filteredEvents.length === 0 && (
+              <div className="text-center py-12">
+                <h3 className="text-2xl font-semibold text-gray-600">No events found</h3>
+                <p className="text-gray-500 mt-2">Try adjusting your search or filters</p>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

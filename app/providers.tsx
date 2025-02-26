@@ -43,7 +43,6 @@ export function AuthProvider({
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, !!session);
         if (session) {
           setUser(session.user);
         } else {
