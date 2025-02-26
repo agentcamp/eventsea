@@ -1,18 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signInWithGitHub } from '@/lib/auth';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') || '/create-event';
+
+  useEffect(() => {
+    // Check for error in URL
+    const errorMsg = searchParams.get('error');
+    if (errorMsg) {
+      setError(errorMsg);
+    }
+  }, [searchParams]);
 
   const handleGitHubSignIn = async () => {
     try {
+      setError(null);
       setIsLoading(true);
-      await signInWithGitHub();
-      // Note: The actual redirect will happen in the callback route
+      await signInWithGitHub(next);
     } catch (error) {
       console.error('Error signing in with GitHub:', error);
+      setError('Failed to sign in with GitHub. Please try again.');
       setIsLoading(false);
     }
   };
@@ -28,6 +42,11 @@ export default function SignIn() {
             Create and manage your events
           </p>
         </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
         <div className="mt-8">
           <button
             onClick={handleGitHubSignIn}

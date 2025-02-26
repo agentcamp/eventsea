@@ -9,9 +9,26 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = createRouteHandlerClient({ cookies });
-    await supabase.auth.exchangeCodeForSession(code);
+    
+    try {
+      await supabase.auth.exchangeCodeForSession(code);
+      
+      // Get the session to confirm it worked
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Failed to get session after code exchange');
+      }
+      
+      // Successful authentication, redirect to the requested page
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}${next}`);
+    } catch (error) {
+      console.error('Auth error:', error);
+      // Redirect to sign in page on error
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}/auth/signin?error=Authentication failed`);
+    }
   }
 
-  // Redirect to the requested page or default to create-event
-  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}${next}`);
+  // No code present, redirect to sign in
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_SITE_ORIGIN}/auth/signin`);
 } 
