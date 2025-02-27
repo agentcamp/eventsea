@@ -4,11 +4,14 @@ import type React from "react";
 
 import { useState } from "react";
 import {
+  AlignLeft,
+  BookText,
   Calendar,
-  Clock,
   Globe,
-  Link,
+  Hash,
+  MapPin,
   PencilIcon,
+  Ticket,
   Users,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -24,11 +27,13 @@ import TimezoneSelect, { ITimezone } from "react-timezone-select";
 
 export default function CreateEvent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentHashtag, setCurrentHashtag] = useState("");
   const [image, setImage] = useState("https://picsum.photos/1280/720");
   const [selectedTimezone, setSelectedTimezone] = useState<ITimezone>("");
 
   const [formData, setFormData] = useState({
     title: "",
+    hashtags: [] as string[],
     startDate: format(new Date(), "yyyy-MM-dd"),
     startTime: "11:30",
     endDate: format(new Date(), "yyyy-MM-dd"),
@@ -46,9 +51,45 @@ export default function CreateEvent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    console.log(formData.timezone);
-    // Handle form submission
-    setIsSubmitting(false);
+
+    const startAt = new Date(`${formData.startDate}T${formData.startTime}:00`);
+    const endAt = new Date(`${formData.endDate}T${formData.endTime}:00`);
+
+    const timezoneString =
+      typeof formData.timezone === "string"
+        ? formData.timezone
+        : formData.timezone?.value ||
+          Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    let imageBase64 = null;
+    if (image && !image.startsWith("https://picsum.photos")) {
+      try {
+        const response = await fetch(image);
+        const blob = await response.blob();
+        imageBase64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        });
+      } catch (error) {
+        console.error("Error processing image:", error);
+      }
+    }
+
+    const eventData = {
+      title: formData.title,
+      startAt,
+      endAt,
+      location: formData.location,
+      description: formData.description,
+      isUnlimitedCapacity: formData.isUnlimitedCapacity,
+      capacityValue: formData.isUnlimitedCapacity
+        ? null
+        : formData.capacityValue,
+      timezone: timezoneString,
+      imageBase64,
+      hashtags: formData.hashtags,
+    };
   };
 
   return (
@@ -87,14 +128,116 @@ export default function CreateEvent() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6 rounded-lg p-4">
-            <Input
-              placeholder="Event Name"
-              className="bg-card border-0 text-popover-foreground placeholder-white/60"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
-            />
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <BookText className="w-5 h-5 text-popover-foreground/60" />
+                <Label className="text-popover-foreground/90">Event Name</Label>
+              </div>
+              <Input
+                placeholder="Event Name"
+                className="bg-card border-0 text-popover-foreground placeholder-white/60"
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Hash className="w-5 h-5 text-popover-foreground/60" />
+                <Label className="text-popover-foreground/90">Hashtags</Label>
+              </div>
+
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add event hashtag (e.g. tech, music)"
+                  className="bg-card border-0 text-popover-foreground placeholder-white/60"
+                  value={currentHashtag}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    // Remover o # se o usuário digitou
+                    if (value.startsWith("#")) {
+                      value = value.substring(1);
+                    }
+                    setCurrentHashtag(value);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && currentHashtag.trim()) {
+                      e.preventDefault();
+                      if (!formData.hashtags.includes(currentHashtag.trim())) {
+                        setFormData({
+                          ...formData,
+                          hashtags: [
+                            ...formData.hashtags,
+                            currentHashtag.trim(),
+                          ],
+                        });
+                      }
+                      setCurrentHashtag("");
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="default"
+                  className="border-white/20 text-popover-foreground hover:bg-white/20"
+                  onClick={() => {
+                    if (
+                      currentHashtag.trim() &&
+                      !formData.hashtags.includes(currentHashtag.trim())
+                    ) {
+                      setFormData({
+                        ...formData,
+                        hashtags: [...formData.hashtags, currentHashtag.trim()],
+                      });
+                      setCurrentHashtag("");
+                    }
+                  }}
+                >
+                  Add
+                </Button>
+              </div>
+
+              {/* Exibição das hashtags como badges */}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {formData.hashtags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className="bg-card border border-white/20 text-popover-foreground rounded-full px-3 py-1 text-sm flex items-center gap-1"
+                  >
+                    #{tag}
+                    <button
+                      type="button"
+                      className="text-popover-foreground/60 hover:text-popover-foreground ml-1 focus:outline-none"
+                      onClick={() => {
+                        setFormData({
+                          ...formData,
+                          hashtags: formData.hashtags.filter(
+                            (_, i) => i !== index
+                          ),
+                        });
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
 
             <div className="grid sm:grid-cols-2 gap-6">
               <div className="space-y-4">
@@ -123,7 +266,7 @@ export default function CreateEvent() {
               </div>
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-popover-foreground/60" />
+                  <Calendar className="w-5 h-5 text-popover-foreground/60" />
                   <Label className="text-popover-foreground/90">End</Label>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -187,7 +330,7 @@ export default function CreateEvent() {
 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Link className="w-5 h-5 text-popover-foreground/60" />
+                <MapPin className="w-5 h-5 text-popover-foreground/60" />
                 <Label className="text-popover-foreground/90">Location</Label>
               </div>
               <Input
@@ -200,14 +343,22 @@ export default function CreateEvent() {
               />
             </div>
 
-            <Textarea
-              placeholder="Add description"
-              className="min-h-[100px] bg-card border-0 text-popover-foreground placeholder-white/60"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-            />
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <AlignLeft className="w-5 h-5 text-popover-foreground/60" />
+                <Label className="text-popover-foreground/90">
+                  Event Description
+                </Label>
+              </div>
+              <Textarea
+                placeholder="Add description"
+                className="min-h-[100px] bg-card border-0 text-popover-foreground placeholder-white/60"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
 
             <Card className="bg-card backdrop-blur border-0 p-6 space-y-4">
               <h3 className="font-semibold text-xl text-popover-foreground">
@@ -216,12 +367,15 @@ export default function CreateEvent() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label
-                    htmlFor="tickets"
-                    className="text-popover-foreground/90"
-                  >
-                    Tickets
-                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Ticket className="w-5 h-5 text-popover-foreground/60" />
+                    <Label
+                      htmlFor="tickets"
+                      className="text-popover-foreground/90"
+                    >
+                      Tickets
+                    </Label>
+                  </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-popover-foreground/60">
                       Free
