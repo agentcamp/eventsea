@@ -2,10 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "./providers";
 
 export default function Home() {
-  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-primary">
@@ -21,7 +19,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link 
-                href={user ? "/create-event" : "/auth/signin?next=/create-event"} 
+                href="/create-event" 
                 className="px-8 py-4 bg-white text-primary rounded-lg hover:bg-secondary transition-colors font-semibold text-center"
               >
                 Create Event
