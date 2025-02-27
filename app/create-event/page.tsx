@@ -3,7 +3,14 @@
 import type React from "react";
 
 import { useState } from "react";
-import { Calendar, Clock, Globe, ImageIcon, Link, Users } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Globe,
+  Link,
+  PencilIcon,
+  Users,
+} from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
 
@@ -12,13 +19,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 
 import TimezoneSelect, { ITimezone } from "react-timezone-select";
 
 export default function CreateEvent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [image, setImage] = useState("/placeholder.avif");
+  const [image, setImage] = useState("https://picsum.photos/1280/720");
   const [selectedTimezone, setSelectedTimezone] = useState<ITimezone>("");
 
   const [formData, setFormData] = useState({
@@ -32,6 +38,8 @@ export default function CreateEvent() {
     isPublic: true,
     requireApproval: false,
     capacity: "Unlimited",
+    isUnlimitedCapacity: true,
+    capacityValue: 100,
     timezone: "" as unknown as ITimezone,
   });
 
@@ -61,24 +69,18 @@ export default function CreateEvent() {
                   }
                 }}
               />
-              {image ? (
+              {image && (
                 <Image
-                  src={image || "/placeholder.jpg"}
+                  src={image || "https://picsum.photos/1280/720"}
                   alt="Event cover"
-                  width={0}
-                  height={0}
-                  className="w-full h-full object-cover"
+                  quality={100}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 300px"
+                  className="object-cover"
                 />
-              ) : (
-                <div className="flex flex-col items-center justify-center p-4">
-                  <ImageIcon className="w-12 h-12 mb-2 text-popover-foreground/60" />
-                  <p className="text-sm text-popover-foreground/80">
-                    Upload event image
-                  </p>
-                </div>
               )}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                <p className="text-popover-foreground">Change image</p>
+              <div className="absolute bottom-3 right-3 bg-black/70 rounded-full p-2 text-white z-[1] shadow-md">
+                <PencilIcon className="w-4 h-4" />
               </div>
             </Card>
           </div>
@@ -227,6 +229,7 @@ export default function CreateEvent() {
                     <Button
                       variant="default"
                       size="sm"
+                      disabled
                       className="border-white/20 text-popover-foreground hover:bg-white/20"
                     >
                       Edit
@@ -234,7 +237,7 @@ export default function CreateEvent() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
+                {/* <div className="flex items-center justify-between">
                   <Label
                     htmlFor="approval"
                     className="text-popover-foreground/90"
@@ -248,7 +251,7 @@ export default function CreateEvent() {
                       setFormData({ ...formData, requireApproval: checked })
                     }
                   />
-                </div>
+                </div> */}
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -258,16 +261,58 @@ export default function CreateEvent() {
                     </Label>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-popover-foreground/60">
-                      Unlimited
-                    </span>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className="border-white/20 text-popover-foreground hover:bg-white/20"
-                    >
-                      Edit
-                    </Button>
+                    {formData.isUnlimitedCapacity ? (
+                      <>
+                        <span className="text-sm text-popover-foreground/60">
+                          Unlimited
+                        </span>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="border-white/20 text-popover-foreground hover:bg-white/20"
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              isUnlimitedCapacity: false,
+                              capacity: formData.capacityValue.toString(),
+                            })
+                          }
+                        >
+                          Set Limit
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Input
+                          type="number"
+                          min="1"
+                          className="w-20 h-8 bg-card border-0 text-popover-foreground"
+                          value={formData.capacityValue}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value) || 1;
+                            setFormData({
+                              ...formData,
+                              capacityValue: value,
+                              capacity: value.toString(),
+                            });
+                          }}
+                        />
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="border-white/20 text-popover-foreground hover:bg-white/20"
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              isUnlimitedCapacity: true,
+                              capacity: "Unlimited",
+                            })
+                          }
+                        >
+                          Unlimited
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
