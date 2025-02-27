@@ -37,6 +37,8 @@ import { useCreateEvent } from "@/hooks/events.hook";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -45,11 +47,11 @@ const formSchema = z.object({
   startTime: z.string().min(1, { message: "Start time is required" }),
   endDate: z.string().min(1, { message: "End date is required" }),
   endTime: z.string().min(1, { message: "End time is required" }),
-  location: z.string().optional(),
-  description: z.string().optional(),
+  location: z.string().min(1, { message: "Location is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
   isUnlimitedCapacity: z.boolean().default(true),
   capacityValue: z.number().optional(),
-  timezone: z.any().optional(),
+  timezone: z.string().min(1, { message: "Timezone is required" }),
   imageBase64: z.string().optional(),
 })
 
@@ -57,6 +59,7 @@ export default function CreateEvent() {
   const [currentHashtag, setCurrentHashtag] = useState("");
   const [image, setImage] = useState("https://picsum.photos/1280/720");
   const { mutate: createEvent, isPending } = useCreateEvent();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -96,7 +99,7 @@ export default function CreateEvent() {
     const timezoneString =
       typeof data.timezone === "string"
         ? data.timezone
-        : data.timezone?.value ||
+        : data.timezone ||
           Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     let imageBase64: undefined | string = undefined;
@@ -127,7 +130,16 @@ export default function CreateEvent() {
       hashtags: data.hashtags,
     };
 
-    await createEvent(eventData);
+    await createEvent(eventData, {
+      onSuccess: () => {
+        toast.success("Event created successfully!");
+        form.reset();
+        router.push("/events");
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
   };
 
   return (
@@ -255,26 +267,32 @@ export default function CreateEvent() {
                       control={form.control}
                       name="startDate"
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            type="date"
-                            className="bg-card border-0 text-popover-foreground placeholder-white/60"
-                            {...field}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              className="bg-card border-0 text-popover-foreground placeholder-white/60"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                     <FormField
                       control={form.control}
                       name="startTime"
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            type="time"
-                            className="bg-card border-0 text-popover-foreground placeholder-white/60"
-                            {...field}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="time"
+                              className="bg-card border-0 text-popover-foreground placeholder-white/60"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </div>
@@ -290,26 +308,32 @@ export default function CreateEvent() {
                       control={form.control}
                       name="endDate"
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            type="date"
-                            className="bg-card border-0 text-popover-foreground placeholder-white/60"
-                            {...field}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              className="bg-card border-0 text-popover-foreground placeholder-white/60"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                     <FormField
                       control={form.control}
                       name="endTime"
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            type="time"
-                            className="bg-card border-0 text-popover-foreground placeholder-white/60"
-                            {...field}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="time"
+                              className="bg-card border-0 text-popover-foreground placeholder-white/60"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </div>
@@ -328,7 +352,9 @@ export default function CreateEvent() {
                     <FormControl>
                       <TimezoneSelect
                         value={field.value}
-                        onChange={field.onChange}
+                        onChange={(timezone: any) => {
+                          field.onChange(timezone.value);
+                        }}
                         styles={{
                           control: (base, state) => ({
                             ...base,
@@ -352,6 +378,7 @@ export default function CreateEvent() {
                         }}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -372,6 +399,7 @@ export default function CreateEvent() {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -392,6 +420,7 @@ export default function CreateEvent() {
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -448,18 +477,21 @@ export default function CreateEvent() {
                                   control={form.control}
                                   name="capacityValue"
                                   render={({ field: capacityField }) => (
-                                    <FormControl>
-                                      <Input
-                                        type="number"
-                                        min="1"
-                                        className="w-20 h-8 bg-card border-0 text-popover-foreground"
-                                        {...capacityField}
-                                        onChange={(e) => {
-                                          const value = parseInt(e.target.value) || 1;
-                                          capacityField.onChange(value);
-                                        }}
-                                      />
-                                    </FormControl>
+                                    <FormItem>
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          min="1"
+                                          className="w-20 h-8 bg-card border-0 text-popover-foreground"
+                                          {...capacityField}
+                                          onChange={(e) => {
+                                            const value = parseInt(e.target.value) || 1;
+                                            capacityField.onChange(value);
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
                                   )}
                                 />
                                 <Button
