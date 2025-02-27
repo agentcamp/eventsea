@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge";
 import { MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
+import { EventWithHashtags } from "@/hooks/events.hook";
 
 export default function EventCard({
   event,
@@ -11,7 +12,7 @@ export default function EventCard({
   setSelectedHashtags,
   selectedHashtags,
 }: {
-  event: any;
+  event: EventWithHashtags;
   viewMode: "grid" | "list";
   setSelectedHashtags: (hashtag: string[]) => void;
   selectedHashtags: string[];
@@ -30,7 +31,7 @@ export default function EventCard({
       {viewMode === "list" && (
         <div className="w-full sm:w-32 flex-shrink-0 flex items-center justify-center p-2 sm:p-4 border-b sm:border-b-0 sm:border-r bg-card">
           <span className="text-xl sm:text-2xl font-bold">
-            {new Date(event.date).toLocaleTimeString("en-US", {
+            {new Date(event.startAt).toLocaleTimeString("en-US", {
               hour: "2-digit",
               minute: "2-digit",
             })}
@@ -53,7 +54,7 @@ export default function EventCard({
         >
           <Image
             src={
-              event.thumbnail ||
+              event.imageBase64 ||
               `https://picsum.photos/seed/${event.id}/600/400`
             }
             alt={event.title}
@@ -81,7 +82,7 @@ export default function EventCard({
                 </CardTitle>
                 {viewMode === "grid" && (
                   <div className="text-sm text-muted-foreground mt-1">
-                    {new Date(event.date).toLocaleTimeString("en-US", {
+                    {new Date(event.startAt).toLocaleTimeString("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
@@ -90,11 +91,11 @@ export default function EventCard({
               </div>
               <div className="flex flex-col items-end gap-1">
                 <Badge variant={event.isFree ? "secondary" : "default"}>
-                  {event.isFree ? "Free" : `$${event.price}`}
+                  {event.isFree ? "Free" : "Paid"}
                 </Badge>
-                {event.isSoldOut && (
+                {/* {event.isSoldOut && (
                   <Badge variant="destructive">Sold Out</Badge>
-                )}
+                )} */}
               </div>
             </div>
           </CardHeader>
@@ -121,18 +122,18 @@ export default function EventCard({
             <div className="flex flex-wrap gap-1 mt-1 sm:mt-2">
               {event.hashtags
                 .slice(0, viewMode === "list" ? 5 : 2)
-                .map((hashtag: string) => (
+                .map((hashtag) => (
                   <Badge
-                    key={hashtag}
+                    key={hashtag.id}
                     variant="outline"
                     className="cursor-pointer hover:bg-accent text-xs"
                     onClick={() => {
-                      if (!selectedHashtags.includes(hashtag)) {
-                        setSelectedHashtags([...selectedHashtags, hashtag]);
+                      if (!selectedHashtags.includes(hashtag.title)) {
+                        setSelectedHashtags([...selectedHashtags, hashtag.title]);
                       }
                     }}
                   >
-                    #{hashtag}
+                    #{hashtag.title}
                   </Badge>
                 ))}
               {event.hashtags.length > (viewMode === "list" ? 5 : 2) && (
@@ -146,17 +147,17 @@ export default function EventCard({
             <div className="flex items-center space-x-2">
               <Avatar className="h-6 w-6 sm:h-8 sm:w-8 border-2 border-white shadow-sm ring-2 ring-background overflow-hidden">
                 <AvatarImage
-                  src={event.creator.avatar}
-                  alt={event.creator.name}
+                  src={event.organizer.image}
+                  alt={event.organizer.name}
                   className="object-cover"
                 />
                 <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-primary-foreground font-medium text-xs sm:text-sm">
-                  {event.creator.name[0]}
+                  {event.organizer.name[0]}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
                 <span className="text-xs sm:text-sm font-medium leading-none">
-                  {event.creator.name}
+                  {event.organizer.name}
                 </span>
                 <span className="text-[10px] sm:text-xs text-muted-foreground">
                   Organizer

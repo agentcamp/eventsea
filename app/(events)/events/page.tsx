@@ -7,106 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import EventsCalendar from "@/components/EventsCalendar";
 import EventCard from "@/components/EventCard";
+import { EventWithHashtags, useGetEvents } from "@/hooks/events.hook";
 
-// This would typically come from an API or database
-const events = [
-  {
-    id: 1,
-    title: "Tech Conference 2023",
-    date: "2023-09-15T09:00:00Z",
-    location: "San Francisco, CA",
-    thumbnail: "https://picsum.photos/600/400",
-    price: 199,
-    creator: { name: "TechOrg", avatar: "/placeholder.avif" },
-    description:
-      "Join us for the biggest tech conference of the year. Network with industry leaders, attend workshops, and discover the latest innovations in technology.",
-    attendees: 520,
-    isFree: false,
-    isOnline: false,
-    hashtags: ["tech", "conference", "programming"],
-    isSoldOut: false,
-  },
-  {
-    id: 2,
-    title: "Virtual Yoga Workshop",
-    date: "2023-08-20T18:30:00Z",
-    location: "Online",
-    thumbnail: "https://picsum.photos/600/400",
-    price: 0,
-    description:
-      "Join us for a relaxing virtual yoga workshop. All levels welcome.",
-    creator: {
-      name: "YogaLife",
-      avatar: "/placeholder.avif",
-    },
-    attendees: 150,
-    isFree: true,
-    isOnline: true,
-    hashtags: ["wellness", "yoga", "health"],
-    isSoldOut: false,
-  },
-  {
-    id: 3,
-    title: "Local Food Festival",
-    date: "2023-10-01T11:00:00Z",
-    location: "Central Park, New York",
-    thumbnail: "https://picsum.photos/600/400",
-    price: 25,
-    description:
-      "Experience the best local cuisine at our annual food festival. Enjoy live music, cooking demonstrations, and tastings from top chefs.",
-    creator: {
-      name: "NYCFoodies",
-      avatar: "/placeholder.avif",
-    },
-    attendees: 1200,
-    isFree: false,
-    isOnline: false,
-    hashtags: ["foodie", "drink"],
-    isSoldOut: true,
-  },
-  {
-    id: 4,
-    title: "Digital Marketing Seminar",
-    date: "2023-09-05T14:00:00Z",
-    location: "Online",
-    thumbnail: "https://picsum.photos/600/400",
-    price: 50,
-    description:
-      "Learn the latest strategies in digital marketing from industry experts. Perfect for marketers of all levels.",
-    creator: {
-      name: "MarketPros",
-      avatar: "/placeholder.avif",
-    },
-    attendees: 300,
-    isFree: false,
-    isOnline: true,
-    hashtags: ["marketing"],
-    isSoldOut: false,
-  },
-  {
-    id: 5,
-    title: "Community Art Exhibition",
-    date: "2023-09-22T10:00:00Z",
-    location: "Downtown Gallery, Chicago",
-    thumbnail: "https://picsum.photos/600/400",
-    price: 0,
-    description:
-      "Explore the creativity of local artists at our community art exhibition. Free entry for all.",
-    creator: {
-      name: "ArtChicago",
-      avatar: "/placeholder.avif",
-    },
-    attendees: 500,
-    isFree: true,
-    isOnline: false,
-    hashtags: ["arts"],
-    isSoldOut: false,
-  },
-];
-
-function groupEventsByDate(events: any[]) {
-  const groups = events.reduce((acc, event) => {
-    const date = new Date(event.date).toLocaleDateString("en-US", {
+function groupEventsByDate(events: EventWithHashtags[]) {
+  const groups = events.reduce((acc: { [key: string]: EventWithHashtags[] }, event) => {
+    const date = new Date(event.startAt).toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
@@ -133,11 +38,13 @@ export default function ExploreEvents() {
     "next"
   );
 
+  const { data: events, isPending } = useGetEvents();
+
   const filteredEvents = useMemo(() => {
     const now = new Date();
     return events
-      .filter((event) => {
-        const eventDate = new Date(event.date);
+      ?.filter((event) => {
+        const eventDate = new Date(event.startAt);
         const matchesDate = selectedDate
           ? eventDate.toDateString() === selectedDate.toDateString()
           : calendarView === "next"
@@ -150,7 +57,7 @@ export default function ExploreEvents() {
           selectedHashtags.length === 0 ||
           selectedHashtags.some((tag) =>
             event.hashtags.some((eventTag) =>
-              eventTag.toLowerCase().includes(tag.toLowerCase())
+              eventTag.title.toLowerCase().includes(tag.toLowerCase())
             )
           );
 
@@ -160,16 +67,16 @@ export default function ExploreEvents() {
 
         return matchesDate && matchesHashtags && matchesSearch;
       })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
   }, [selectedDate, selectedHashtags, searchQuery, calendarView]);
 
   const groupedEvents = useMemo(
-    () => groupEventsByDate(filteredEvents),
+    () => groupEventsByDate(filteredEvents ?? []),
     [filteredEvents]
   );
 
   const uniqueHashtags = useMemo(() => {
-    const hashtags = events.flatMap((event) => event.hashtags || []);
+    const hashtags = events?.flatMap((event) => event.hashtags || []);
     return [...new Set(hashtags)].slice(0, 10);
   }, [events]);
 
@@ -222,26 +129,26 @@ export default function ExploreEvents() {
             <div className="flex flex-wrap gap-2">
               {uniqueHashtags.map((hashtag) => (
                 <Badge
-                  key={hashtag}
+                  key={hashtag.id}
                   variant={
-                    selectedHashtags.includes(hashtag) ? "default" : "outline"
+                    selectedHashtags.includes(hashtag.title) ? "default" : "outline"
                   }
                   className={`cursor-pointer transition-colors ${
-                    selectedHashtags.includes(hashtag)
+                    selectedHashtags.includes(hashtag.title)
                       ? "hover:bg-primary/90"
                       : "hover:bg-accent hover:text-accent-foreground"
                   }`}
                   onClick={() => {
-                    if (selectedHashtags.includes(hashtag)) {
+                    if (selectedHashtags.includes(hashtag.title)) {
                       setSelectedHashtags(
-                        selectedHashtags.filter((tag) => tag !== hashtag)
+                        selectedHashtags.filter((tag) => tag !== hashtag.title)
                       );
                     } else {
-                      setSelectedHashtags([...selectedHashtags, hashtag]);
+                      setSelectedHashtags([...selectedHashtags, hashtag.title]);
                     }
                   }}
                 >
-                  #{hashtag}
+                  #{hashtag.title}
                 </Badge>
               ))}
               {selectedHashtags.length > 0 && (
@@ -268,7 +175,7 @@ export default function ExploreEvents() {
                     : "space-y-4 sm:space-y-8"
                 }
               >
-                {groupedEvents.map(([date, dateEvents]: any) => (
+                {groupedEvents.map(([date, dateEvents]) => (
                   <div key={date} className="space-y-2 sm:space-y-4">
                     <h2 className="text-lg font-semibold sticky top-0 bg-background py-2 z-10">
                       {date}
@@ -280,7 +187,7 @@ export default function ExploreEvents() {
                           : "space-y-4"
                       }
                     >
-                      {dateEvents.map((event: any, index: number) => (
+                      {dateEvents.map((event, index) => (
                         <div key={event.id} className="relative">
                           {viewMode === "list" &&
                             index !== dateEvents.length - 1 && (
