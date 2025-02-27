@@ -2,30 +2,15 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { MapPin, Users, Grid, List } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { MapPin, Users, Grid, List, X } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import Image from "next/image";
 
 // This would typically come from an API or database
 const events = [
@@ -34,13 +19,15 @@ const events = [
     title: "Tech Conference 2023",
     date: "2023-09-15T09:00:00Z",
     location: "San Francisco, CA",
-    thumbnail: "/placeholder.avif",
+    thumbnail: "https://picsum.photos/600/400",
     price: 199,
     creator: { name: "TechOrg", avatar: "/placeholder.avif" },
+    description:
+      "Join us for the biggest tech conference of the year. Network with industry leaders, attend workshops, and discover the latest innovations in technology.",
     attendees: 520,
     isFree: false,
     isOnline: false,
-    category: "Technology",
+    hashtags: ["tech", "conference", "programming"],
     isSoldOut: false,
   },
   {
@@ -48,8 +35,10 @@ const events = [
     title: "Virtual Yoga Workshop",
     date: "2023-08-20T18:30:00Z",
     location: "Online",
-    thumbnail: "/placeholder.avif",
+    thumbnail: "https://picsum.photos/600/400",
     price: 0,
+    description:
+      "Join us for a relaxing virtual yoga workshop. All levels welcome.",
     creator: {
       name: "YogaLife",
       avatar: "/placeholder.avif",
@@ -57,7 +46,7 @@ const events = [
     attendees: 150,
     isFree: true,
     isOnline: true,
-    category: "Health & Wellness",
+    hashtags: ["wellness", "yoga", "health"],
     isSoldOut: false,
   },
   {
@@ -65,8 +54,10 @@ const events = [
     title: "Local Food Festival",
     date: "2023-10-01T11:00:00Z",
     location: "Central Park, New York",
-    thumbnail: "/placeholder.avif",
+    thumbnail: "https://picsum.photos/600/400",
     price: 25,
+    description:
+      "Experience the best local cuisine at our annual food festival. Enjoy live music, cooking demonstrations, and tastings from top chefs.",
     creator: {
       name: "NYCFoodies",
       avatar: "/placeholder.avif",
@@ -74,7 +65,7 @@ const events = [
     attendees: 1200,
     isFree: false,
     isOnline: false,
-    category: "Food & Drink",
+    hashtags: ["foodie", "drink"],
     isSoldOut: true,
   },
   {
@@ -82,8 +73,10 @@ const events = [
     title: "Digital Marketing Seminar",
     date: "2023-09-05T14:00:00Z",
     location: "Online",
-    thumbnail: "/placeholder.avif",
+    thumbnail: "https://picsum.photos/600/400",
     price: 50,
+    description:
+      "Learn the latest strategies in digital marketing from industry experts. Perfect for marketers of all levels.",
     creator: {
       name: "MarketPros",
       avatar: "/placeholder.avif",
@@ -91,7 +84,7 @@ const events = [
     attendees: 300,
     isFree: false,
     isOnline: true,
-    category: "Business",
+    hashtags: ["marketing"],
     isSoldOut: false,
   },
   {
@@ -99,8 +92,10 @@ const events = [
     title: "Community Art Exhibition",
     date: "2023-09-22T10:00:00Z",
     location: "Downtown Gallery, Chicago",
-    thumbnail: "/placeholder.avif",
+    thumbnail: "https://picsum.photos/600/400",
     price: 0,
+    description:
+      "Explore the creativity of local artists at our community art exhibition. Free entry for all.",
     creator: {
       name: "ArtChicago",
       avatar: "/placeholder.avif",
@@ -108,18 +103,9 @@ const events = [
     attendees: 500,
     isFree: true,
     isOnline: false,
-    category: "Arts & Culture",
+    hashtags: ["arts"],
     isSoldOut: false,
   },
-];
-
-const categories = [
-  "All",
-  "Technology",
-  "Health & Wellness",
-  "Food & Drink",
-  "Business",
-  "Arts & Culture",
 ];
 
 function groupEventsByDate(events: any[]) {
@@ -144,7 +130,7 @@ function groupEventsByDate(events: any[]) {
 
 export default function ExploreEvents() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedHashtags, setSelectedHashtags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [calendarView, setCalendarView] = useState<"next" | "past" | "date">(
@@ -163,20 +149,33 @@ export default function ExploreEvents() {
           : calendarView === "past"
           ? eventDate < now
           : true;
-        const matchesCategory =
-          selectedCategory === "All" || event.category === selectedCategory;
+
+        const matchesHashtags =
+          selectedHashtags.length === 0 ||
+          selectedHashtags.some((tag) =>
+            event.hashtags.some((eventTag) =>
+              eventTag.toLowerCase().includes(tag.toLowerCase())
+            )
+          );
+
         const matchesSearch = event.title
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
-        return matchesDate && matchesCategory && matchesSearch;
+
+        return matchesDate && matchesHashtags && matchesSearch;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [selectedDate, selectedCategory, searchQuery, calendarView]);
+  }, [selectedDate, selectedHashtags, searchQuery, calendarView]);
 
   const groupedEvents = useMemo(
     () => groupEventsByDate(filteredEvents),
     [filteredEvents]
   );
+
+  const uniqueHashtags = useMemo(() => {
+    const hashtags = events.flatMap((event) => event.hashtags || []);
+    return [...new Set(hashtags)].slice(0, 10); // Mostrar até 10 hashtags únicas
+  }, [events]);
 
   return (
     <div className="flex flex-col md:flex-row gap-6 px-6 py-12">
@@ -194,21 +193,7 @@ export default function ExploreEvents() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-[200px]"
               />
-              <Select
-                value={selectedCategory}
-                onValueChange={setSelectedCategory}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
               <div className="flex space-x-1">
                 <Button
                   variant={viewMode === "grid" ? "secondary" : "outline"}
@@ -226,6 +211,43 @@ export default function ExploreEvents() {
                 </Button>
               </div>
             </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {uniqueHashtags.map((hashtag) => (
+              <Badge
+                key={hashtag}
+                variant={
+                  selectedHashtags.includes(hashtag) ? "default" : "outline"
+                }
+                className={`cursor-pointer transition-colors ${
+                  selectedHashtags.includes(hashtag)
+                    ? "hover:bg-primary/90"
+                    : "hover:bg-accent hover:text-accent-foreground"
+                }`}
+                onClick={() => {
+                  if (selectedHashtags.includes(hashtag)) {
+                    setSelectedHashtags(
+                      selectedHashtags.filter((tag) => tag !== hashtag)
+                    );
+                  } else {
+                    setSelectedHashtags([...selectedHashtags, hashtag]);
+                  }
+                }}
+              >
+                #{hashtag}
+              </Badge>
+            ))}
+            {selectedHashtags.length > 0 && (
+              <Badge
+                variant="secondary"
+                className="cursor-pointer hover:bg-secondary/80 transition-colors flex items-center gap-1"
+                onClick={() => setSelectedHashtags([])}
+              >
+                <X className="h-3 w-3" />
+                <span>Clear all</span>
+              </Badge>
+            )}
           </div>
 
           {groupedEvents.length === 0 ? (
@@ -256,7 +278,12 @@ export default function ExploreEvents() {
                           index !== dateEvents.length - 1 && (
                             <div className="absolute left-16 top-20 bottom-0 w-px bg-border" />
                           )}
-                        <EventCard event={event} viewMode={viewMode} />
+                        <EventCard
+                          event={event}
+                          setSelectedHashtags={setSelectedHashtags}
+                          selectedHashtags={selectedHashtags}
+                          viewMode={viewMode}
+                        />
                       </div>
                     ))}
                   </div>
@@ -313,10 +340,19 @@ export default function ExploreEvents() {
 function EventCard({
   event,
   viewMode,
+  setSelectedHashtags,
+  selectedHashtags,
 }: {
   event: any;
   viewMode: "grid" | "list";
+  setSelectedHashtags: (hashtag: string[]) => void;
+  selectedHashtags: string[];
 }) {
+  function truncateText(text: string, maxLength: number) {
+    if (!text || text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + "...";
+  }
+
   return (
     <Card className={`overflow-hidden ${viewMode === "list" ? "flex" : ""}`}>
       {viewMode === "list" && (
@@ -332,17 +368,32 @@ function EventCard({
       <div
         className={`${viewMode === "list" ? "flex flex-1 bg-card" : "bg-card"}`}
       >
-        <div className={viewMode === "list" ? "w-1/4" : ""}>
-          <img
-            src={event.thumbnail || "/placeholder.svg"}
+        <div
+          className={
+            viewMode === "list"
+              ? "w-1/4 relative h-auto"
+              : "relative w-full h-48"
+          }
+        >
+          <Image
+            src={
+              event.thumbnail ||
+              `https://picsum.photos/seed/${event.id}/600/400`
+            }
             alt={event.title}
-            className={`object-cover ${
-              viewMode === "list" ? "h-full" : "w-full h-48"
-            }`}
+            fill
+            sizes={viewMode === "list" ? "25vw" : "100%"}
+            className="object-cover"
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAIhQOUfMHzRAAAAABJRU5ErkJggg=="
           />
         </div>
-        <div className={`flex flex-col ${viewMode === "list" ? "w-3/4" : ""}`}>
-          <CardHeader>
+        <div
+          className={`flex flex-col h-full ${
+            viewMode === "list" ? "w-3/4" : ""
+          }`}
+        >
+          <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
               <div>
                 <CardTitle className="text-xl">{event.title}</CardTitle>
@@ -365,33 +416,63 @@ function EventCard({
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2 p-6">
+          <CardContent className="flex-grow space-y-2 pb-2">
             <div className="flex items-center text-sm text-muted-foreground">
-              <MapPin className="mr-1  h-4 w-4" />
+              <MapPin className="mr-1 h-4 w-4" />
               {event.location}
             </div>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Users className="mr-1 h-4 w-4" />
-              {event.attendees} attending
+
+            {event.description && (
+              <p
+                className={`text-sm mt-2 text-muted-foreground ${
+                  viewMode === "grid"
+                    ? "line-clamp-2 h-10"
+                    : "line-clamp-3 h-[4.5rem]"
+                }`}
+              >
+                {viewMode === "list"
+                  ? truncateText(event.description, 300)
+                  : truncateText(event.description, 160)}
+              </p>
+            )}
+
+            <div className="flex flex-wrap gap-1 mt-2">
+              {event.hashtags.map((hashtag: string) => (
+                <Badge
+                  key={hashtag}
+                  variant="outline"
+                  className="cursor-pointer hover:bg-accent text-xs"
+                  onClick={() => {
+                    if (!selectedHashtags.includes(hashtag)) {
+                      setSelectedHashtags([...selectedHashtags, hashtag]);
+                    }
+                  }}
+                >
+                  #{hashtag}
+                </Badge>
+              ))}
             </div>
-            <Badge variant="outline">{event.category}</Badge>
           </CardContent>
           <div className="mt-auto p-4 flex justify-between items-center border-t">
             <div className="flex items-center space-x-2">
-              <Avatar className="h-8 w-8">
+              <Avatar className="h-8 w-8 border-2 border-white shadow-sm ring-2 ring-background overflow-hidden">
                 <AvatarImage
                   src={event.creator.avatar}
                   alt={event.creator.name}
+                  className="object-cover"
                 />
-                <AvatarFallback>{event.creator.name[0]}</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary text-primary-foreground font-medium">
+                  {event.creator.name[0]}
+                </AvatarFallback>
               </Avatar>
-              <span className="text-sm text-muted-foreground">
-                {event.creator.name}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium leading-none">
+                  {event.creator.name}
+                </span>
+                <span className="text-xs text-muted-foreground">Organizer</span>
+              </div>
             </div>
-            <Link href={`/events/${event.id}`}>
-              <Button>View Details</Button>
-            </Link>
+            <Button>Register Now</Button>
           </div>
         </div>
       </div>
