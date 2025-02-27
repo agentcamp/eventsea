@@ -4,6 +4,18 @@ import GitHub from "next-auth/providers/github";
 export default {
   providers: [GitHub],
   callbacks: {
+    jwt: ({ token, user }) => {
+      if (user) {
+        token.id = user.id;
+      }
+      return token;
+    },
+    session: ({ session, token }: { session: any, token: any }) => {
+      if (token) {
+        session.user.id = token.id;
+      }
+      return session;
+    },
     authorized: ({ auth, request: { nextUrl }}) => {
       const isLoggedIn = !!auth?.user;
       const isOnRegister = nextUrl.pathname.startsWith('/register');

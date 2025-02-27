@@ -66,8 +66,8 @@ model Event {
   title               String
   startAt             DateTime
   endAt               DateTime
-  location            String?
-  description         String?
+  location            String
+  description         String
   isUnlimitedCapacity Boolean        @default(true)
   isFree              Boolean        @default(true)
   capacityValue       Int?
