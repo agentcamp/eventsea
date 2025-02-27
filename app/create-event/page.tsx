@@ -1,15 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../providers';
 import { createEvent } from '@/lib/database';
 
 const CATEGORIES = ['Technology', 'Art', 'Finance', 'Music', 'Sports', 'Other'];
 
 export default function CreateEvent() {
   const router = useRouter();
-  const { user, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -21,12 +19,6 @@ export default function CreateEvent() {
     category: CATEGORIES[0],
     image: '/event-1.jpg', // Default image for now
   });
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth/signin?next=/create-event');
-    }
-  }, [loading, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,14 +38,6 @@ export default function CreateEvent() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
-  if (loading || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
