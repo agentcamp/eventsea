@@ -62,6 +62,24 @@
   }
 }
 
+@layer utilities {
+  .bg-gradient-primary {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 100%
+    );
+  }
+
+  .bg-gradient-accent {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--chart-2)) 0%,
+      hsl(var(--accent)) 100%
+    );
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
