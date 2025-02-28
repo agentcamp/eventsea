@@ -4,6 +4,7 @@ import "./globals.css";
 import { NextAuthProvider } from "@/providers/next-auth-provider";
 import ReactQueryProvider from "@/providers/react-query-provider";
 import { Toaster } from "@/components/ui/sonner";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ReactQueryProvider>
-          <NextAuthProvider>{children}</NextAuthProvider>
+          <NextAuthProvider>
+            <Navbar />
+            <div className="pt-12">{children}</div>
+          </NextAuthProvider>
         </ReactQueryProvider>
         <Toaster />
       </body>
