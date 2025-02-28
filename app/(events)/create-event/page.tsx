@@ -15,7 +15,6 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { format } from "date-fns";
 import Image from "next/image";
 
 import { Label } from "@/components/ui/label";
@@ -57,7 +56,7 @@ const formSchema = z.object({
 
 export default function CreateEvent() {
   const [currentHashtag, setCurrentHashtag] = useState("");
-  const [image, setImage] = useState("https://picsum.photos/1280/720");
+  const [image, setImage] = useState("/placeholder.avif");
   const { mutate: createEvent, isPending } = useCreateEvent();
   const router = useRouter();
 
@@ -66,10 +65,10 @@ export default function CreateEvent() {
     defaultValues: {
       title: "",
       hashtags: [],
-      startDate: format(new Date(), "yyyy-MM-dd"),
-      startTime: "11:30",
-      endDate: format(new Date(), "yyyy-MM-dd"),
-      endTime: "12:30",
+      startDate: "",
+      startTime: "",
+      endDate: "",
+      endTime: "",
       location: "",
       description: "",
       capacityValue: 100,
