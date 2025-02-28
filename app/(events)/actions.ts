@@ -6,7 +6,7 @@ type SubscriptionEmailParams = {
     image?: string | null;
     name?: string | null;
     githubUserName?: string | null;
-  }
+  };
   eventTitle: string;
   eventDate: Date;
   eventLocation: string;
@@ -28,11 +28,11 @@ export async function sendSubscriptionConfirmation({
   if (!user.email) {
     throw new Error("User email is not defined");
   }
-  
+
   // Parse the URL
   const url = new URL(emailServerUrl);
-  const secure = url.protocol === 'smtps:';
-  
+  const secure = url.protocol === "smtps:";
+
   const transporter = nodemailer.createTransport({
     host: url.hostname,
     port: Number(url.port) || (secure ? 465 : 587),
@@ -40,7 +40,7 @@ export async function sendSubscriptionConfirmation({
     auth: {
       user: decodeURIComponent(url.username),
       pass: decodeURIComponent(url.password),
-    }
+    },
   });
 
   const formattedDate = new Date(eventDate).toLocaleString("en-US", {
@@ -110,67 +110,73 @@ export function generateEventTicketHtml({
 }): string {
   return `
     <div style="max-width: 500px; margin: 0 auto;">
-      <div style="position: relative; display: flex; background-color: #000000; color: #ffffff; border-radius: 12px; overflow: hidden; border: 2px solid #a855f7;">
-        <!-- Main ticket content -->
-        <div style="flex: 1; padding: 24px;">
-          <!-- Profile section -->
-          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">
+   <div style="position: relative; display: flex; background-color: #000000; color: #ffffff; border-radius: 12px; overflow: hidden; border: 2px solid #a855f7;">
+      <!-- Main ticket content -->
+      <div style="flex: 1; padding: 24px;">
+         <!-- Profile section -->
+         <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px;">
             <div style="border-radius: 50%; overflow: hidden; width: 64px; height: 64px; background-color: #99f6e4;">
-              <img 
-                src="${profileImage || "https://placehold.co/64x64/99f6e4/ffffff?text=" + (username ? username.charAt(0).toUpperCase() : 'U')}" 
-                alt="${username}"
-                width="64" 
-                height="64" 
-                style="width: 100%; height: 100%; object-fit: cover;"
-              />
+               <img 
+               src="${
+                 profileImage ||
+                 "https://placehold.co/64x64/99f6e4/ffffff?text=" +
+                   (username ? username.charAt(0).toUpperCase() : "U")
+               }" 
+               alt="${username}"
+               width="64" 
+               height="64" 
+               style="width: 100%; height: 100%; object-fit: cover;"
+               />
             </div>
             <div>
-              <h2 style="font-size: 1.5rem; font-weight: bold; margin: 0 0 4px 0;">${username}</h2>
-              ${githubUserName ? `
-              <div style="display: flex; align-items: center; color: #9ca3af; gap: 4px;">
-                <img 
-                  src="https://raw.githubusercontent.com/github/explore/78df643247d429f6cc873026c0622819ad797942/topics/github/github.png" 
-                  alt="Github Icon"
-                  width="16" 
-                  height="16" 
-                  style="background-color: #9ca3af; border-radius: 2px;"
-                />
-                <span>${githubUserName}</span>
-              </div>
-              ` : ''}
+               <h2 style="font-size: 1.5rem; font-weight: bold; margin: 0 0 4px 0;">${username}</h2>
+               ${
+                 githubUserName
+                   ? `
+               <div style="display: flex; align-items: center; color: #9ca3af; gap: 4px;">
+                  <img 
+                     src="https://raw.githubusercontent.com/github/explore/78df643247d429f6cc873026c0622819ad797942/topics/github/github.png" 
+                     alt="Github Icon"
+                     width="16" 
+                     height="16" 
+                     style="background-color: #9ca3af; border-radius: 2px;"
+                     />
+                  <span>${githubUserName}</span>
+               </div>
+               `
+                   : ""
+               }
             </div>
-          </div>
-
-          <!-- Event details -->
-          <div style="margin-bottom: 32px;">
+         </div>
+         <!-- Event details -->
+         <div style="margin-bottom: 32px;">
             <div style="margin-bottom: 16px;">
-              <h3 style="font-size: 1.5rem; font-weight: bold; color: #a855f7; margin: 0 0 4px 0;">
-                ${eventName}
-              </h3>
+               <h3 style="font-size: 1.5rem; font-weight: bold; color: #a855f7; margin: 0 0 4px 0;">
+                  ${eventName}
+               </h3>
             </div>
-
             <div style="margin-bottom: 16px;">
-              <p style="font-size: 1.125rem; font-weight: 500; margin: 0 0 8px 0;">${eventDate}</p>
-              <p style="font-size: 1.125rem; font-weight: 500; margin: 0;">${eventLocation}</p>
+               <p style="font-size: 1.125rem; font-weight: 500; margin: 0 0 8px 0;">${eventDate}</p>
+               <p style="font-size: 1.125rem; font-weight: 500; margin: 0;">${eventLocation}</p>
             </div>
-
             <div style="color: #9ca3af; font-size: 0.875rem;">
-              <p style="margin: 0 0 4px 0;">Created by EventSea</p>
-              <p style="margin: 0;">eventsea.xyz</p>
+               <p style="margin: 0 0 4px 0;">Created by EventSea</p>
+               <p style="margin: 0;">eventsea.xyz</p>
             </div>
-          </div>
-        </div>
-
-        <!-- Ticket number section with dotted line -->
-        <div style="position: relative;">
-          <div style="position: absolute; top: 0; bottom: 0; left: 0; border-left: 1px dashed #4b5563;"></div>
-          <div style="height: 100%; display: flex; align-items: center; padding: 24px 16px;">
-            <div style="transform: rotate(90deg); transform-origin: center; white-space: nowrap;">
-              <p style="font-size: 1.5rem; font-weight: bold; margin: 0;">№ ${subscriptionId}</p>
-            </div>
-          </div>
-        </div>
+         </div>
       </div>
-    </div>
+      <!-- Ticket number section with dotted line -->
+      <table role="presentation" width="40%" cellpadding="0" cellspacing="0" border="0">
+         <tr>
+            <!-- Left Dashed Line -->
+            <td width="1" style="border-left: 1px dashed #4b5563;"></td>
+            <!-- Subscription ID -->
+            <td align="center" style="padding: 16px; font-size: 1.5rem; font-weight: bold; writing-mode: vertical-lr;">
+               <span>№ ${subscriptionId}</span>
+            </td>
+         </tr>
+      </table>
+   </div>
+</div>
   `;
 }
