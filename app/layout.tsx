@@ -23,8 +23,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ReactQueryProvider>
-          <Navbar />
           <NextAuthProvider>
+            <Navbar />
             <div className="pt-12">{children}</div>
           </NextAuthProvider>
         </ReactQueryProvider>
