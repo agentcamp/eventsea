@@ -38,6 +38,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -59,6 +60,7 @@ export default function CreateEvent() {
   const [image, setImage] = useState("/placeholder.avif");
   const { mutate: createEvent, isPending } = useCreateEvent();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -131,9 +133,10 @@ export default function CreateEvent() {
 
     await createEvent(eventData, {
       onSuccess: () => {
-        toast.success("Event created successfully!");
         form.reset();
+        queryClient.invalidateQueries({ queryKey: ["events"] });
         router.push("/events");
+        toast.success("Event created successfully!");
       },
       onError: (error) => {
         toast.error(error.message);
