@@ -39,7 +39,7 @@ export default function FeatureSection() {
               key={index}
               className="p-8 rounded-2xl bg-white border border-border hover:shadow-xl transition-all hover:-translate-y-1 group"
             >
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-colors">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:bg-primary/35 group-hover:text-white transition-colors">
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
