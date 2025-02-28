@@ -69,7 +69,7 @@ export default function ExploreEvents() {
         return matchesDate && matchesHashtags && matchesSearch;
       })
       .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
-  }, [selectedDate, selectedHashtags, searchQuery, calendarView]);
+  }, [selectedDate, selectedHashtags, searchQuery, calendarView, events]);
 
   const groupedEvents = useMemo(
     () => groupEventsByDate(filteredEvents ?? []),

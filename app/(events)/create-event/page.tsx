@@ -32,7 +32,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import TimezoneSelect, { ITimezone } from "react-timezone-select";
+import TimezoneSelect from "react-timezone-select";
 import { useCreateEvent } from "@/hooks/events.hook";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -352,7 +352,7 @@ export default function CreateEvent() {
                     <FormControl>
                       <TimezoneSelect
                         value={field.value}
-                        onChange={(timezone: any) => {
+                        onChange={(timezone) => {
                           field.onChange(timezone.value);
                         }}
                         styles={{
