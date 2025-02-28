@@ -49,8 +49,8 @@ export default function Navbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-36">
                 <DropdownMenuItem
-                  onClick={() => signOut()}
-                  className="w-full text-foreground/80 hover:text-primary"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="w-full text-foreground/80 hover:text-primary cursor-pointer"
                 >
                   Logout
                 </DropdownMenuItem>
@@ -58,7 +58,7 @@ export default function Navbar() {
             </DropdownMenu>
           ) : (
             <Link
-              href="/api/auth/signin"
+              href="/signin"
               className="px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors"
             >
               Log in
