@@ -4,15 +4,17 @@ import GitHub from "next-auth/providers/github";
 export default {
   providers: [GitHub],
   callbacks: {
-    jwt: ({ token, user }) => {
+    jwt: ({ token, user, profile }) => {
       if (user) {
         token.id = user.id;
-      }
+        token.githubUserName = profile?.login;
+      } 
       return token;
     },
     session: ({ session, token }: { session: any, token: any }) => {
       if (token) {
         session.user.id = token.id;
+        session.user.githubUserName = token.githubUserName;
       }
       return session;
     },

@@ -4,7 +4,8 @@ import { Badge } from "./ui/badge";
 import { MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { EventWithHashtags } from "@/hooks/events.hook";
+import { EventWithHashtags, useSubscribeToEvent } from "@/hooks/events.hook";
+import { toast } from "sonner";
 
 export default function EventCard({
   event,
@@ -17,10 +18,23 @@ export default function EventCard({
   setSelectedHashtags: (hashtag: string[]) => void;
   selectedHashtags: string[];
 }) {
-  function truncateText(text: string, maxLength: number) {
+  const { mutate: subscribeToEvent, isPending } = useSubscribeToEvent();
+
+  const truncateText = (text: string, maxLength: number) => {
     if (!text || text.length <= maxLength) return text;
     return text.slice(0, maxLength) + "...";
   }
+
+  const handleSubscribe = async () => {
+    await subscribeToEvent(event.id, {
+      onSuccess: () => {
+        toast.success("Subscribed to event successfully");
+      },
+      onError: () => {
+        toast.error("Failed to subscribe to event");
+      },
+    });
+  };
 
   return (
     <Card
@@ -164,8 +178,8 @@ export default function EventCard({
                 </span>
               </div>
             </div>
-            <Button size="sm" className="w-full sm:w-auto">
-              Register
+            <Button size="sm" className="w-full sm:w-auto" onClick={handleSubscribe} disabled={isPending}>
+              {isPending ? "Loading..." : "Register"}
             </Button>
           </div>
         </div>

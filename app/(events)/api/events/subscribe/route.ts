@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { validateWithZod } from "@/lib/utils";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { nanoid } from "nanoid";
 
 const subscribeToEventSchema = z.object({
   eventId: z.string().uuid("Invalid event ID"),
@@ -13,7 +14,7 @@ export async function POST(request: Request) {
   try {
     const session = await auth();
 
-    if (!session || !session.user || !session.user.id) {
+    if (!session || !session.user || !session.user.id || !session.user.email) {
       return NextResponse.json(
         { message: "Authentication required" },
         { status: 401 }
@@ -25,27 +26,41 @@ export async function POST(request: Request) {
     const body = await request.json();
     const data = validateWithZod(subscribeToEventSchema, body);
     if (data instanceof NextResponse) return data;
-    const event = await prisma.event.update({
-      where: { id: data.eventId },
-      data: {
-        participants: {
-          connect: { id: userId },
+    const subscription = await prisma.eventParticipant.upsert({
+      where: {
+        eventId_userId: {
+          userId,
+          eventId: data.eventId,
         },
       },
+      create: {
+        userId,
+        eventId: data.eventId,
+        status: "going",
+        subscriptionId: nanoid(8),
+      },
+      update: {},
       include: {
-        organizer: true,
+        event: true,
       },
     });
 
-    await sendSubscriptionConfirmation(
-      session.user.email as string,
-      session.user.image as string,
-      session.user.name || "",
-      event.title,
-      event.startAt,
-      event.location || "",
-      event.id
-    );
+    const { success } = await sendSubscriptionConfirmation({
+      user: session.user,
+      eventTitle: subscription.event.title,
+      eventDate: subscription.event.startAt,
+      eventLocation: subscription.event.location,
+      subscriptionId: subscription.subscriptionId,
+    });
+
+    if (!success) {
+      return NextResponse.json(
+        { message: "Internal server error." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ message: "Subscribed to event successfully" });
   } catch (error) {
     console.error("Error subscribing to event:", error);
     return NextResponse.json(
