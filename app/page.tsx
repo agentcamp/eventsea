@@ -31,9 +31,9 @@ export default function Home() {
 
             <div className="bg-white p-8 md:p-10 rounded-2xl shadow-xl">
               <p className="text-xl md:text-2xl font-medium text-foreground/80 italic mb-8">
-                "Eventsea transformed how we run our tech conferences. The
+                &quot;Eventsea transformed how we run our tech conferences. The
                 token-gated access and real-time analytics have increased our
-                attendance by 40% and improved attendee satisfaction."
+                attendance by 40% and improved attendee satisfaction.&quot;
               </p>
               <div className="flex items-center justify-center gap-4">
                 <div className="h-12 w-12 rounded-full overflow-hidden">
