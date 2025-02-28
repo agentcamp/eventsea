@@ -1,4 +1,4 @@
-import { Event } from "@prisma/client";
+import { Event, EventParticipant } from "@prisma/client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 interface CreateEventData {
@@ -61,7 +61,7 @@ export const useCreateEvent = () => {
 export const useSubscribeToEvent = () => {
   return useMutation({
     mutationFn: async (eventId: string) => {
-      const response = await fetch("/api/events/subscribe", {
+      const response = await fetch("/api/events/subscriptions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,3 +75,17 @@ export const useSubscribeToEvent = () => {
     },
   });
 };
+
+export const useGetMySubscriptions = () => {
+  return useQuery({
+    queryKey: ["subscriptions"],
+    queryFn: async () => {
+      const response = await fetch("/api/events/subscriptions");
+      if (!response.ok) {
+        throw new Error("Failed to fetch subscriptions");
+      }
+      const data = (await response.json()) as EventParticipant[];
+      return data;
+    },
+  });
+}

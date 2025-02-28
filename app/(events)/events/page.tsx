@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import EventsCalendar from "@/components/EventsCalendar";
 import EventCard from "@/components/EventCard";
-import { EventWithHashtags, useGetEvents } from "@/hooks/events.hook";
+import { EventWithHashtags, useGetEvents, useGetMySubscriptions } from "@/hooks/events.hook";
 
 function groupEventsByDate(events: EventWithHashtags[]) {
   const groups = events.reduce((acc: { [key: string]: EventWithHashtags[] }, event) => {
@@ -38,7 +38,8 @@ export default function ExploreEvents() {
     "next"
   );
 
-  const { data: events, isPending } = useGetEvents();
+  const { data: events } = useGetEvents();
+  const { data: subscriptions } = useGetMySubscriptions();
 
   const filteredEvents = useMemo(() => {
     const now = new Date();
@@ -198,6 +199,7 @@ export default function ExploreEvents() {
                             setSelectedHashtags={setSelectedHashtags}
                             selectedHashtags={selectedHashtags}
                             viewMode={viewMode}
+                            subscriptions={subscriptions}
                           />
                         </div>
                       ))}
