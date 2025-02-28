@@ -78,7 +78,7 @@ export default function EventCard({
           <Image
             src={
               event.imageBase64 ||
-              `https://picsum.photos/seed/${event.id}/600/400`
+              "/placeholder.avif"
             }
             alt={event.title}
             fill
@@ -88,8 +88,6 @@ export default function EventCard({
                 : "(max-width: 640px) 100vw, 50vw"
             }
             className="object-cover"
-            placeholder="blur"
-            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAIhQOUfMHzRAAAAABJRU5ErkJggg=="
           />
         </div>
         <div
