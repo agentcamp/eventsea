@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Footer from "@/components/LandingFooter";
-import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/LandingHeroSection";
 import TrustedBySection from "@/components/LandingTrustedBySection";
 import FeatureSection from "@/components/LandingFeatureSection";
@@ -9,9 +8,6 @@ import CtaSection from "@/components/LandingCtaSection";
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* Navigation */}
-      <Navbar />
-
       {/* Hero Section */}
       <HeroSection />
 
