@@ -6,19 +6,27 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { EventWithHashtags, useSubscribeToEvent } from "@/hooks/events.hook";
 import { toast } from "sonner";
+import { EventParticipant } from "@prisma/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function EventCard({
   event,
   viewMode,
   setSelectedHashtags,
   selectedHashtags,
+  subscriptions
 }: {
   event: EventWithHashtags;
   viewMode: "grid" | "list";
   setSelectedHashtags: (hashtag: string[]) => void;
   selectedHashtags: string[];
+  subscriptions?: EventParticipant[];
 }) {
   const { mutate: subscribeToEvent, isPending } = useSubscribeToEvent();
+  const isSubscribed = subscriptions?.some(
+    (subscription) => subscription.eventId === event.id
+  );
+  const queryClient = useQueryClient();
 
   const truncateText = (text: string, maxLength: number) => {
     if (!text || text.length <= maxLength) return text;
@@ -29,6 +37,7 @@ export default function EventCard({
     await subscribeToEvent(event.id, {
       onSuccess: () => {
         toast.success("Subscribed to event successfully");
+        queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
       },
       onError: () => {
         toast.error("Failed to subscribe to event");
@@ -178,8 +187,8 @@ export default function EventCard({
                 </span>
               </div>
             </div>
-            <Button size="sm" className="w-full sm:w-auto" onClick={handleSubscribe} disabled={isPending}>
-              {isPending ? "Loading..." : "Register"}
+            <Button size="sm" className="w-full sm:w-auto" onClick={handleSubscribe} disabled={isPending || isSubscribed}>
+              {isPending ? "Loading..." : (isSubscribed ? "Subscribed" : "Subscribe")}
             </Button>
           </div>
         </div>
