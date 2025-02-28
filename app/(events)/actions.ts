@@ -129,7 +129,13 @@ export function generateEventTicketHtml({
                />
             </div>
             <div>
-               <h2 style="font-size: 1.5rem; font-weight: bold; margin: 0 0 4px 0;">${username}</h2>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="200">
+                <tr>
+                  <td style="font-size: 1.5rem; font-weight: bold; max-width: 150px; overflow: hidden; white-space: nowrap;">
+                    ${username}
+                  </td>
+                </tr>
+              </table>
                ${
                  githubUserName
                    ? `
