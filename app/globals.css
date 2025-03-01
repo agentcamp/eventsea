@@ -2,133 +2,89 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-  --primary: #d896ff;
-  --primary-hover: #c87df0;
-  --secondary: #fff387;
-  --secondary-hover: #f0e57d;
-  --accent: #ff7f7f;
-  --accent-foreground: #ffffff;
-  --muted: #f1e5d3;
-  --muted-foreground: #64748b;
-  
-  /* Brand Colors */
-  --secondary-yellow: #fff387;
-  --secondary-red: #ff7f7f;
-
-  /* Brand Gradients */
-  --gradient-primary: linear-gradient(135deg, var(--primary), var(--secondary-yellow));
-  --gradient-secondary: linear-gradient(135deg, var(--secondary-yellow), var(--secondary-red));
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #1a1a1a;
-    --foreground: #f8fafc;
-    --primary: #d896ff;
-    --primary-hover: #c87df0;
-    --secondary: #fff387;
-    --secondary-hover: #f0e57d;
-    --accent: #ff7f7f;
-    --accent-foreground: #ffffff;
-    --muted: #f1e5d3;
-    --muted-foreground: #94a3b8;
+    --background: 35.172413793103445 44.61538461538455% 87.2549019607843%;
+    --foreground: 228 8.771929824561402% 11.176470588235293%;
+    --card: 240 11.111111111111104% 94.70588235294117%;
+    --card-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --popover: 240 11.111111111111104% 94.70588235294117%;
+    --popover-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --primary: 0 100.00000000000003% 74.90196078431373%;
+    --primary-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --secondary: 277.71428571428567 99.99999999999997% 79.41176470588235%;
+    --secondary-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --muted: 240 11.111111111111104% 94.70588235294117%;
+    --muted-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --accent: 0 100.00000000000003% 74.90196078431373%;
+    --accent-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --destructive: 0 84.23645320197042% 60.196078431372534%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 35.172413793103445 44.61538461538455% 87.2549019607843%;
+    --input: 33.75 31.999999999999968% 90.19607843137254%;
+    --ring: 0 100.00000000000003% 74.90196078431373%;
+    --chart-1: 0 100.00000000000003% 74.90196078431373%;
+    --chart-2: 54 99.99999999999997% 76.47058823529412%;
+    --chart-3: 277.71428571428567 99.99999999999997% 79.41176470588235%;
+    --chart-4: 35.172413793103445 44.61538461538455% 87.2549019607843%;
+    --chart-5: 228 8.771929824561402% 11.176470588235293%;
+
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 35.172413793103445 44.61538461538455% 87.2549019607843%;
+    --foreground: 228 8.771929824561402% 11.176470588235293%;
+    --card: 240 11.111111111111104% 94.70588235294117%;
+    --card-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --popover: 240 11.111111111111104% 94.70588235294117%;
+    --popover-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --primary: 0 100.00000000000003% 74.90196078431373%;
+    --primary-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --secondary: 277.71428571428567 99.99999999999997% 79.41176470588235%;
+    --secondary-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --muted: 240 11.111111111111104% 94.70588235294117%;
+    --muted-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --accent: 0 100.00000000000003% 74.90196078431373%;
+    --accent-foreground: 228 8.771929824561402% 11.176470588235293%;
+    --destructive: 0 84.23645320197042% 60.196078431372534%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 35.172413793103445 44.61538461538455% 87.2549019607843%;
+    --input: 33.75 31.999999999999968% 90.19607843137254%;
+    --ring: 0 100.00000000000003% 74.90196078431373%;
+    --chart-1: 0 100.00000000000003% 74.90196078431373%;
+    --chart-2: 54 99.99999999999997% 76.47058823529412%;
+    --chart-3: 277.71428571428567 99.99999999999997% 79.41176470588235%;
+    --chart-4: 35.172413793103445 44.61538461538455% 87.2549019607843%;
+    --chart-5: 228 8.771929824561402% 11.176470588235293%;
+
+    --radius: 1rem;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .bg-gradient-primary {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 100%
+    );
+  }
+
+  .bg-gradient-accent {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--chart-2)) 0%,
+      hsl(var(--accent)) 100%
+    );
+  }
 }
 
-/* Custom Utility Classes */
-.text-gradient-primary {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.text-gradient-secondary {
-  background: linear-gradient(135deg, var(--secondary), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.bg-gradient-primary {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-}
-
-.bg-gradient-secondary {
-  background: linear-gradient(135deg, var(--secondary), var(--accent));
-}
-
-/* Brand Color Utilities */
-.text-primary {
-  color: var(--primary);
-}
-
-.text-secondary-yellow {
-  color: var(--secondary-yellow);
-}
-
-.text-secondary-red {
-  color: var(--secondary-red);
-}
-
-.bg-primary {
-  background-color: var(--primary);
-}
-
-.bg-secondary-yellow {
-  background-color: var(--secondary-yellow);
-}
-
-.bg-secondary-red {
-  background-color: var(--secondary-red);
-}
-
-.border-primary {
-  border-color: var(--primary);
-}
-
-.border-secondary-yellow {
-  border-color: var(--secondary-yellow);
-}
-
-.border-secondary-red {
-  border-color: var(--secondary-red);
-}
-
-/* Hover States */
-.hover\:text-primary:hover {
-  color: var(--primary);
-}
-
-.hover\:text-secondary-yellow:hover {
-  color: var(--secondary-yellow);
-}
-
-.hover\:text-secondary-red:hover {
-  color: var(--secondary-red);
-}
-
-.hover\:bg-primary:hover {
-  background-color: var(--primary);
-}
-
-.hover\:bg-secondary-yellow:hover {
-  background-color: var(--secondary-yellow);
-}
-
-.hover\:bg-secondary-red:hover {
-  background-color: var(--secondary-red);
-}
-
-.hover\:border-primary:hover {
-  border-color: var(--primary);
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
